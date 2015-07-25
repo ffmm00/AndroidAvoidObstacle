@@ -4,7 +4,7 @@ public class Obstacle extends GameObject {
 
     private int speed;
 
-    public Obstacle(int left, int top, int width, int height) {
+    public Obstacle(int left, int top, int width, int height,int speed) {
         super(left, top, width, height);
         setSpeed(speed);
     }

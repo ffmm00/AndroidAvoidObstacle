@@ -19,6 +19,7 @@ public class GameObject {
 
     public void move(int left, int top) {
         this.left = getLeft() + left;
+        this.top = getTop() + top;
     }
 
     public int getLeft() {
