@@ -5,7 +5,7 @@
     <string name="start">Start</string>
     <string name="finished">ゴールしました</string>
     <string name="failed">落っこちました</string>
-    <string name="collision">衝突しました</string>
+    <string name="collision">岩に衝突しました</string>
     <string name="is_continue">続けますか？</string>
     <string name="action_settings">Settings</string>
 </resources>

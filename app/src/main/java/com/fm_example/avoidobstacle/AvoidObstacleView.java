@@ -57,6 +57,7 @@ public class AvoidObstacleView extends SurfaceView implements SurfaceHolder.Call
     private Path mWallLowerRight;
     private Path mWallUpperRight;
     private Path mWallCenter;
+    private Path mWallStartBlock;
 
     private Region mRegionGoalZone;
     private Region mRegionStartZone;
@@ -67,6 +68,7 @@ public class AvoidObstacleView extends SurfaceView implements SurfaceHolder.Call
     private Region mRegionWallLowerRight;
     private Region mRegionWallUpperRight;
     private Region mRegionWallCenter;
+    private Region mRegionWallStartBlock;
 
     private Region mRegionWholeScreen;
 
@@ -141,15 +143,6 @@ public class AvoidObstacleView extends SurfaceView implements SurfaceHolder.Call
     private void zoneDecide() {
         mRegionWholeScreen = new Region(0, 0, mWidth, mHeight);
 
-        //Path mWallLowerLeft;
-        //Path mWallUpperLeft;
-        //Path mWallLowerRight;
-        //Path mWallUpperRight;
-        //Path mWallCenter;
-        mWallLowerLeft = new Path();
-        mWallLowerLeft.addRect(OUT_WIDTH, 1200, OUT_WIDTH + 200, 1150, Path.Direction.CW);
-        mRegionWallLowerLeft = new Region();
-        mRegionWallLowerLeft.setPath(mWallLowerLeft, mRegionWholeScreen);
 
         mGoalZone = new Path();
         mGoalZone.addRect(OUT_WIDTH, 0, mWidth - OUT_WIDTH, GOAL_HEIGHT, Path.Direction.CW);
@@ -171,8 +164,38 @@ public class AvoidObstacleView extends SurfaceView implements SurfaceHolder.Call
         mRegionOutZoneR = new Region();
         mRegionOutZoneR.setPath(mOutZoneR, mRegionWholeScreen);
 
+        mWallLowerRight = new Path();
+        mWallLowerRight.addRect(mWidth / 2, mHeight * 3 / 4 - 80, mWidth / 2 + 200, mHeight * 3 / 4 - 30, Path.Direction.CW);
+        mRegionWallLowerRight = new Region();
+        mRegionWallLowerRight.setPath(mWallLowerRight, mRegionWholeScreen);
+
+        mWallLowerLeft = new Path();
+        mWallLowerLeft.addRect(OUT_WIDTH, mHeight * 3 / 4 - 90, OUT_WIDTH + 200, mHeight * 3 / 4 - 40, Path.Direction.CW);
+        mRegionWallLowerLeft = new Region();
+        mRegionWallLowerLeft.setPath(mWallLowerLeft, mRegionWholeScreen);
+
+        mWallUpperRight = new Path();
+        mWallUpperRight.addRect(mWidth - 50, mHeight / 4, mWidth - 300, mHeight / 4 - 50, Path.Direction.CW);
+        mRegionWallUpperRight = new Region();
+        mRegionWallUpperRight.setPath(mWallUpperRight, mRegionWholeScreen);
+
+        mWallUpperLeft = new Path();
+        mWallUpperLeft.addRect(mWidth / 4 - 50, mHeight / 5, mWidth / 4 + 200, mHeight / 5 + 60, Path.Direction.CW);
+        mRegionWallUpperLeft = new Region();
+        mRegionWallUpperLeft.setPath(mWallUpperLeft, mRegionWholeScreen);
+
+        mWallCenter = new Path();
+        mWallCenter.addRect(mWidth / 2 - 130, mHeight / 2, mWidth / 2 + 70, mHeight / 2 + 50, Path.Direction.CW);
+        mRegionWallCenter = new Region();
+        mRegionWallCenter.setPath(mWallCenter, mRegionWholeScreen);
+
+        mWallStartBlock = new Path();
+        mWallStartBlock.addRect(mWidth / 2, mHeight - START_HEIGHT - 10, mWidth - 50, mHeight - START_HEIGHT - 25, Path.Direction.CW);
+        mRegionWallStartBlock = new Region();
+        mRegionWallStartBlock.setPath(mWallStartBlock, mRegionWholeScreen);
 
     }
+
 
     public void drawGameBoard() {
         if ((mIsGone) || (mIsGoal)) {
@@ -180,8 +203,8 @@ public class AvoidObstacleView extends SurfaceView implements SurfaceHolder.Call
         }
 
         mChara.move(MainActivity.role, MainActivity.pitch);
-            if (mChara.getBottom() > mHeight) {
-                mChara.setLocate(mChara.getLeft(), (mHeight - JUMP_HEIGHT));
+        if (mChara.getBottom() > mHeight) {
+            mChara.setLocate(mChara.getLeft(), (mHeight - JUMP_HEIGHT));
         }
 
         try {
@@ -191,51 +214,74 @@ public class AvoidObstacleView extends SurfaceView implements SurfaceHolder.Call
                 }
             }
 
+            Path[] WallZone = {mWallUpperRight, mWallUpperLeft, mWallLowerLeft, mWallLowerRight,
+                    mWallCenter, mWallStartBlock};
+
+            Region[] RegionZone = {mRegionWallLowerLeft, mRegionWallLowerRight, mRegionWallUpperLeft,
+                    mRegionWallUpperRight, mRegionWallStartBlock, mRegionWallCenter};
+
             mCanvas = getHolder().lockCanvas();
             mCanvas.drawColor(Color.LTGRAY);
 
             mPaint.setColor(Color.MAGENTA);
             mCanvas.drawPath(mGoalZone, mPaint);
             mPaint.setColor(Color.GRAY);
+
             mCanvas.drawPath(mStartZone, mPaint);
+
             mPaint.setColor(Color.BLACK);
             mCanvas.drawPath(mOutZoneL, mPaint);
             mCanvas.drawPath(mOutZoneR, mPaint);
 
-            mCanvas.drawPath(mWallLowerLeft, mPaint);
+            for (int i = 0; i < WallZone.length; i++)
+                mCanvas.drawPath(WallZone[i], mPaint);
 
-            mPaint.setColor(Color.BLACK);
             mPaint.setTextSize(50);
-
             mCanvas.drawText(getResources().getString(R.string.goal), mWidth / 2 - 50, 100, mPaint);
             mCanvas.drawText(getResources().getString(R.string.start), mWidth / 2 - 50, mHeight - 50, mPaint);
 
+
             if (mRegionOutZoneL.contains(mChara.getCenterX(), mChara.getCenterY())) {
                 mIsGone = true;
+                mPaint.setColor(Color.LTGRAY);
+                for (int i = 0; i < WallZone.length; i++)
+                    mCanvas.drawPath(WallZone[i], mPaint);
                 String msg = failed();
                 mPaint.setColor(Color.BLACK);
-                mCanvas.drawText(msg, mWidth / 2 - 150, mHeight / 2, mPaint);
+                mCanvas.drawText(msg, mWidth / 3, mHeight / 2, mPaint);
             }
+
             if (mRegionOutZoneR.contains(mChara.getCenterX(), mChara.getCenterY())) {
                 mIsGone = true;
+                mPaint.setColor(Color.LTGRAY);
+                for (int i = 0; i < WallZone.length; i++)
+                    mCanvas.drawPath(WallZone[i], mPaint);
                 String msg = failed();
                 mPaint.setColor(Color.BLACK);
-                mCanvas.drawText(msg, mWidth / 2 - 150, mHeight / 2, mPaint);
+                mCanvas.drawText(msg, mWidth / 3, mHeight / 2, mPaint);
             }
+
+            for (int i = 0; i < RegionZone.length; i++) {
+                if (RegionZone[i].contains(mChara.getCenterX(), mChara.getCenterY())) {
+                    mIsGone = true;
+                    mPaint.setColor(Color.LTGRAY);
+                    for (int m = 0; m < WallZone.length; m++)
+                        mCanvas.drawPath(WallZone[m], mPaint);
+                    String msg = wall();
+                    mPaint.setColor(Color.BLACK);
+                    mCanvas.drawText(msg, mWidth / 3, mHeight / 2, mPaint);
+                }
+            }
+
             if (mRegionGoalZone.contains(mChara.getCenterX(), mChara.getCenterY())) {
                 mIsGoal = true;
+                mPaint.setColor(Color.LTGRAY);
+                for (int i = 0; i < WallZone.length; i++)
+                    mCanvas.drawPath(WallZone[i], mPaint);
                 String msg = goaled();
                 mPaint.setColor(Color.BLACK);
-                mCanvas.drawText(msg, mWidth / 2 - 150, mHeight / 2, mPaint);
+                mCanvas.drawText(msg, mWidth / 2 - 50, mHeight / 2, mPaint);
             }
-
-            if (mRegionWallLowerLeft.contains(mChara.getCenterX(), mChara.getCenterY())) {
-                mIsGone = true;
-                String msg = wall();
-                mPaint.setColor(Color.BLACK);
-                mCanvas.drawText(msg, mWidth / 2 - 150, mHeight / 2, mPaint);
-            }
-
 
             for (Obstacle obstacle : mObstacleList) {
                 if (mRegionStartZone.contains(obstacle.getLeft(), obstacle.getBottom())) {
@@ -246,9 +292,12 @@ public class AvoidObstacleView extends SurfaceView implements SurfaceHolder.Call
             if (!mIsGoal) {
                 for (Obstacle obstacle : mObstacleList) {
                     if (mChara.collisionCheck(obstacle)) {
+                        mPaint.setColor(Color.LTGRAY);
+                        for (int i = 0; i < WallZone.length; i++)
+                            mCanvas.drawPath(WallZone[i], mPaint);
                         String msg = getResources().getString(R.string.collision);
                         mPaint.setColor(Color.BLACK);
-                        mCanvas.drawText(msg, mWidth / 2 - 50, mHeight / 2, mPaint);
+                        mCanvas.drawText(msg, mWidth / 3, mHeight / 2, mPaint);
                         mIsGone = true;
                     }
                 }
@@ -281,7 +330,7 @@ public class AvoidObstacleView extends SurfaceView implements SurfaceHolder.Call
         return "コースアウトしました";
     }
 
-    private String wall(){
+    private String wall() {
         return "壁に衝突しました";
     }
 
